@@ -1,0 +1,177 @@
+{
+  "info": {
+    "name": "Food Distribution System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "restaurantToken", "value": "" },
+    { "key": "ngoToken", "value": "" },
+    { "key": "adminToken", "value": "" },
+    { "key": "foodPostId", "value": "" },
+    { "key": "claimId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Restaurant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Restaurant Owner\",\n  \"email\": \"restaurant@example.com\",\n  \"password\": \"Password123!\",\n  \"phoneNumber\": \"9999999999\",\n  \"role\": \"RESTAURANT\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Register NGO",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"NGO Coordinator\",\n  \"email\": \"ngo@example.com\",\n  \"password\": \"Password123!\",\n  \"phoneNumber\": \"8888888888\",\n  \"role\": \"NGO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"restaurant@example.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profiles",
+      "item": [
+        {
+          "name": "Create Restaurant Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{restaurantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/restaurants/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurantName\": \"Green Bowl\",\n  \"address\": \"Connaught Place, Delhi\",\n  \"latitude\": 28.6315,\n  \"longitude\": 77.2167,\n  \"contactPerson\": \"Asha\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create NGO Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ngoToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/ngos/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ngoName\": \"Helping Hands\",\n  \"address\": \"Karol Bagh, Delhi\",\n  \"latitude\": 28.6517,\n  \"longitude\": 77.1907,\n  \"contactPerson\": \"Ravi\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Food Posts",
+      "item": [
+        {
+          "name": "Create Food Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{restaurantToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/food-posts",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodName\": \"Veg Meals\",\n  \"description\": \"Fresh packed vegetarian meals\",\n  \"quantity\": 25,\n  \"expiryTime\": \"2030-01-01T18:00:00Z\",\n  \"foodType\": \"VEGETARIAN\",\n  \"imageUrl\": \"https://example.com/food.jpg\",\n  \"latitude\": 28.6315,\n  \"longitude\": 77.2167\n}"
+            }
+          }
+        },
+        {
+          "name": "Nearby Food Posts",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ngoToken}}" }],
+            "url": "{{baseUrl}}/api/food-posts/nearby?latitude=28.6139&longitude=77.2090&radiusKm=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Claims",
+      "item": [
+        {
+          "name": "Create Claim",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{ngoToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{baseUrl}}/api/claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"foodPostId\": \"{{foodPostId}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Approve Claim",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{restaurantToken}}" }],
+            "url": "{{baseUrl}}/api/claims/{{claimId}}/approve"
+          }
+        },
+        {
+          "name": "Complete Claim",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{ngoToken}}" }],
+            "url": "{{baseUrl}}/api/claims/{{claimId}}/complete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/dashboard"
+          }
+        },
+        {
+          "name": "All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": "{{baseUrl}}/api/admin/users"
+          }
+        }
+      ]
+    }
+  ]
+}

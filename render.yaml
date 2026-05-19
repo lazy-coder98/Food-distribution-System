@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: food-distribution-system
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /swagger-ui.html
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: EXPIRE_FOOD_POSTS_CRON
+        value: "0 */10 * * * *"
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
