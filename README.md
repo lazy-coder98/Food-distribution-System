@@ -166,3 +166,15 @@ Set collection variables:
 ```bash
 mvn clean package
 ```
+
+## Deploy on Render
+
+This repository includes `render.yaml` for Render Blueprint deployment.
+
+1. Open Render and create a new Blueprint from this GitHub repository.
+2. Set the required secret environment variables:
+   - `MONGODB_URI`
+   - `CORS_ALLOWED_ORIGINS`
+   - `ADMIN_EMAIL`
+   - `ADMIN_PASSWORD`
+3. Render will generate `JWT_SECRET` automatically and deploy the Docker image.
