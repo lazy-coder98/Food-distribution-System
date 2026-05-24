@@ -112,7 +112,7 @@ function renderAuth(message = "", type = "error") {
       <section class="auth-art">
         <div class="auth-copy">
           <h1>Food Distribution System</h1>
-          <p>Sign in to post food, discover nearby donations, claim meals, and monitor distribution workflows backed by MongoDB.</p>
+          <p>Sign in to post food, discover nearby donations, claim meals, and monitor distribution workflows.</p>
         </div>
       </section>
       <section class="auth-form-wrap">
@@ -227,7 +227,7 @@ function viewTitle() {
 
 function viewSubtitle() {
   return {
-    overview: "Live data from your Spring Boot API and MongoDB.",
+    overview: "Live system overview and operations data.",
     food: "Create, update, and retire restaurant food posts.",
     nearby: "Find available food by latitude, longitude, and radius.",
     claims: "Claim food and move requests through approval.",
@@ -267,7 +267,7 @@ async function overviewView() {
     </div>
     <div class="panel" style="margin-top:16px">
       <div class="panel-title">
-        <div><h3>Recent food posts</h3><p>Newest items from MongoDB</p></div>
+        <div><h3>Recent food posts</h3><p>Newest available items</p></div>
       </div>
       ${foodList(foodItems)}
     </div>
