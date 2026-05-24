@@ -11,12 +11,12 @@ const app = document.getElementById("app");
 const DEFAULT_LOCATION = { latitude: 28.6139, longitude: 77.2090 };
 
 const icons = {
-  overview: "[]",
-  food: "+",
-  nearby: "@",
-  claims: "#",
-  profile: "*",
-  admin: "!"
+  overview: "📊",
+  food: "🍲",
+  nearby: "📍",
+  claims: "✅",
+  profile: "👤",
+  admin: "⚙️"
 };
 
 function setSession(auth) {
