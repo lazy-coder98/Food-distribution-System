@@ -60,16 +60,45 @@ button { cursor: pointer; }
 }
 
 .brand-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
   display: grid;
   place-items: center;
-  background: #234d38;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0;
+  background: linear-gradient(145deg, #fdf8e8, #e9f3dc);
+  border: 1px solid #d9e5c8;
+  box-shadow: inset 0 -1px 0 rgba(47, 111, 78, 0.08), 0 3px 10px rgba(32, 37, 31, 0.06);
   flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.brand-mark svg {
+  width: 34px;
+  height: 34px;
+}
+
+.brand-sun { fill: #f4b342; }
+
+.brand-leaf {
+  fill: #4f9a58;
+  stroke: #2f6f4e;
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+}
+
+.brand-basket {
+  fill: #d8843f;
+  stroke: #8c552b;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.brand-handle, .brand-crate {
+  fill: none;
+  stroke: #fff3d5;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .brand h1 {

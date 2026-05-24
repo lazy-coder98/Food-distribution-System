@@ -176,7 +176,15 @@ function renderApp() {
     <main class="shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">FD</div>
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <circle class="brand-sun" cx="32" cy="13" r="7"></circle>
+              <path class="brand-leaf" d="M14 17c9-6 17-4 22 3-7 5-16 5-22-3z"></path>
+              <path class="brand-basket" d="M10 24h28l-3 14H13L10 24z"></path>
+              <path class="brand-handle" d="M17 24c1-8 15-8 16 0"></path>
+              <path class="brand-crate" d="M15 29h18M18 34h12"></path>
+            </svg>
+          </div>
           <div>
             <h1>Food Distribution</h1>
             <p>${escapeHtml(state.user.role)}</p>
