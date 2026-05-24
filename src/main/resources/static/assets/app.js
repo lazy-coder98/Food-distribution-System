@@ -437,6 +437,12 @@ function locationPickerMarkup(id) {
         <span>Select location on map</span>
         <button class="btn secondary" type="button" data-use-current-location>Use current location</button>
       </div>
+      <div class="location-search">
+        <label>Search location
+          <input type="search" data-location-search autocomplete="off" placeholder="Type area, city, or landmark">
+        </label>
+        <div class="location-results hidden" data-location-results></div>
+      </div>
       <iframe
         class="location-map"
         data-location-frame
@@ -479,6 +485,10 @@ function initLocationPickers() {
     const summary = picker.querySelector("[data-location-summary]");
     const mapsLink = picker.querySelector("[data-open-maps]");
     const mapFrame = picker.querySelector("[data-location-frame]");
+    const searchInput = picker.querySelector("[data-location-search]");
+    const resultsNode = picker.querySelector("[data-location-results]");
+    let searchTimer = null;
+    let searchController = null;
 
     const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
     const readLocation = () => ({
@@ -506,6 +516,35 @@ function initLocationPickers() {
         mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${fixedLat},${fixedLng}`;
       }
     };
+    const clearResults = () => {
+      if (!resultsNode) return;
+      resultsNode.innerHTML = "";
+      resultsNode.classList.add("hidden");
+    };
+    const renderResults = places => {
+      if (!resultsNode) return;
+      if (!places.length) {
+        resultsNode.innerHTML = `<div class="location-result muted">No matching places found.</div>`;
+        resultsNode.classList.remove("hidden");
+        return;
+      }
+      resultsNode.innerHTML = places.map(place => `
+        <button class="location-result" type="button" data-place-lat="${escapeHtml(place.lat)}" data-place-lng="${escapeHtml(place.lon)}">
+          <strong>${escapeHtml(place.name || place.display_name.split(",")[0])}</strong>
+          <span>${escapeHtml(place.display_name)}</span>
+        </button>
+      `).join("");
+      resultsNode.classList.remove("hidden");
+    };
+    const searchPlaces = async query => {
+      if (searchController) searchController.abort();
+      searchController = new AbortController();
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=${encodeURIComponent(query)}`, {
+        signal: searchController.signal
+      });
+      if (!response.ok) throw new Error("Location search failed");
+      renderResults(await response.json());
+    };
 
     picker.querySelectorAll("[data-location-adjust]").forEach(button => {
       button.addEventListener("click", () => {
@@ -532,6 +571,31 @@ function initLocationPickers() {
       navigator.geolocation.getCurrentPosition(position => {
         updateLocation(position.coords.latitude, position.coords.longitude);
       });
+    });
+
+    searchInput?.addEventListener("input", () => {
+      const query = searchInput.value.trim();
+      window.clearTimeout(searchTimer);
+      if (query.length < 3) {
+        clearResults();
+        return;
+      }
+      searchTimer = window.setTimeout(() => {
+        searchPlaces(query).catch(error => {
+          if (error.name !== "AbortError" && resultsNode) {
+            resultsNode.innerHTML = `<div class="location-result muted">Unable to load recommendations.</div>`;
+            resultsNode.classList.remove("hidden");
+          }
+        });
+      }, 350);
+    });
+
+    resultsNode?.addEventListener("click", event => {
+      const result = event.target.closest("[data-place-lat]");
+      if (!result) return;
+      updateLocation(result.dataset.placeLat, result.dataset.placeLng);
+      if (searchInput) searchInput.value = result.querySelector("strong")?.textContent || "";
+      clearResults();
     });
 
     const initial = readLocation();
