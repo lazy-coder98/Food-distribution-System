@@ -432,12 +432,30 @@ function profileFormMarkup(isRestaurant, profile) {
 
 function locationPickerMarkup(id) {
   return html`
-    <div class="map-picker">
+    <div id="${id}" class="map-picker" data-location-picker>
       <div class="map-picker-head">
         <span>Select location on map</span>
         <button class="btn secondary" type="button" data-use-current-location>Use current location</button>
       </div>
-      <div id="${id}" class="location-map" data-location-map></div>
+      <iframe
+        class="location-map"
+        data-location-frame
+        title="Selected location map"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="location-tools">
+        <div>
+          <span class="meta">Selected point</span>
+          <strong data-location-summary>28.613900, 77.209000</strong>
+        </div>
+        <div class="coordinate-pad" aria-label="Fine tune selected location">
+          <button class="btn secondary" type="button" data-location-adjust="lat:0.001">North</button>
+          <button class="btn secondary" type="button" data-location-adjust="lng:-0.001">West</button>
+          <button class="btn secondary" type="button" data-location-adjust="lng:0.001">East</button>
+          <button class="btn secondary" type="button" data-location-adjust="lat:-0.001">South</button>
+        </div>
+        <a class="btn secondary" data-open-maps target="_blank" rel="noopener">Open larger map</a>
+      </div>
     </div>
   `;
 }
@@ -450,58 +468,75 @@ function roleLabel(role) {
 }
 
 function initLocationPickers() {
-  if (!window.L) return;
-  document.querySelectorAll("[data-location-map]").forEach(mapNode => {
-    if (mapNode.dataset.ready === "true") return;
+  document.querySelectorAll("[data-location-picker]").forEach(picker => {
+    if (picker.dataset.ready === "true") return;
 
-    const form = mapNode.closest("form");
+    const form = picker.closest("form");
     const latInput = form?.querySelector('input[name="latitude"]');
     const lngInput = form?.querySelector('input[name="longitude"]');
     if (!form || !latInput || !lngInput) return;
 
-    const initialLat = Number(latInput.value) || DEFAULT_LOCATION.latitude;
-    const initialLng = Number(lngInput.value) || DEFAULT_LOCATION.longitude;
-    const map = L.map(mapNode).setView([initialLat, initialLng], 13);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+    const summary = picker.querySelector("[data-location-summary]");
+    const mapsLink = picker.querySelector("[data-open-maps]");
+    const mapFrame = picker.querySelector("[data-location-frame]");
 
-    const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-    const setLocation = latLng => {
-      const lat = Number(latLng.lat).toFixed(6);
-      const lng = Number(latLng.lng).toFixed(6);
-      latInput.value = lat;
-      lngInput.value = lng;
-      marker.setLatLng([lat, lng]);
-      map.panTo([lat, lng]);
+    const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+    const readLocation = () => ({
+      lat: Number(latInput.value) || DEFAULT_LOCATION.latitude,
+      lng: Number(lngInput.value) || DEFAULT_LOCATION.longitude
+    });
+    const updateLocation = (lat, lng) => {
+      const fixedLat = clamp(Number(lat), -90, 90).toFixed(6);
+      const fixedLng = clamp(Number(lng), -180, 180).toFixed(6);
+      const latNumber = Number(fixedLat);
+      const lngNumber = Number(fixedLng);
+      const bounds = 0.018;
+
+      latInput.value = fixedLat;
+      lngInput.value = fixedLng;
+      if (summary) summary.textContent = `${fixedLat}, ${fixedLng}`;
+      if (mapsLink) mapsLink.href = `https://www.openstreetmap.org/?mlat=${fixedLat}&mlon=${fixedLng}#map=15/${fixedLat}/${fixedLng}`;
+      if (mapFrame) {
+        const bbox = [
+          (lngNumber - bounds).toFixed(6),
+          (latNumber - bounds).toFixed(6),
+          (lngNumber + bounds).toFixed(6),
+          (latNumber + bounds).toFixed(6)
+        ].join(",");
+        mapFrame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${fixedLat},${fixedLng}`;
+      }
     };
 
-    map.on("click", event => setLocation(event.latlng));
-    marker.on("dragend", event => setLocation(event.target.getLatLng()));
-    latInput.addEventListener("change", () => {
-      const lat = Number(latInput.value);
-      const lng = Number(lngInput.value);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) setLocation({ lat, lng });
-    });
-    lngInput.addEventListener("change", () => {
-      const lat = Number(latInput.value);
-      const lng = Number(lngInput.value);
-      if (Number.isFinite(lat) && Number.isFinite(lng)) setLocation({ lat, lng });
-    });
-
-    form.querySelector("[data-use-current-location]")?.addEventListener("click", () => {
-      if (!navigator.geolocation) return;
-      navigator.geolocation.getCurrentPosition(position => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        });
+    picker.querySelectorAll("[data-location-adjust]").forEach(button => {
+      button.addEventListener("click", () => {
+        const [axis, delta] = button.dataset.locationAdjust.split(":");
+        const current = readLocation();
+        updateLocation(
+          current.lat + (axis === "lat" ? Number(delta) : 0),
+          current.lng + (axis === "lng" ? Number(delta) : 0)
+        );
       });
     });
 
-    mapNode.dataset.ready = "true";
-    setTimeout(() => map.invalidateSize(), 50);
+    latInput.addEventListener("change", () => {
+      const current = readLocation();
+      updateLocation(current.lat, current.lng);
+    });
+    lngInput.addEventListener("change", () => {
+      const current = readLocation();
+      updateLocation(current.lat, current.lng);
+    });
+
+    picker.querySelector("[data-use-current-location]")?.addEventListener("click", () => {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(position => {
+        updateLocation(position.coords.latitude, position.coords.longitude);
+      });
+    });
+
+    const initial = readLocation();
+    updateLocation(initial.lat, initial.lng);
+    picker.dataset.ready = "true";
   });
 }
 
