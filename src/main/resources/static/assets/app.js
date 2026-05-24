@@ -112,7 +112,7 @@ function renderAuth(message = "", type = "error") {
       <section class="auth-art">
         <div class="auth-copy">
           <h1>Food Distribution System</h1>
-          <p>Sign in to post food, discover nearby donations, claim meals, and monitor distribution workflows.</p>
+          <p>Coordinate surplus food from restaurants to verified local NGOs with clear posts, claims, and pickup status in one place.</p>
         </div>
       </section>
       <section class="auth-form-wrap">
@@ -176,6 +176,7 @@ function renderApp() {
     <main class="shell">
       <aside class="sidebar">
         <div class="brand">
+          <div class="brand-mark">FD</div>
           <div>
             <h1>Food Distribution</h1>
             <p>${escapeHtml(state.user.role)}</p>
@@ -197,6 +198,7 @@ function renderApp() {
         <div class="topbar">
           <div>
             <h2>${viewTitle()}</h2>
+            <p>${viewSubtitle()}</p>
           </div>
           <div class="user-pill">
             <div class="avatar">${escapeHtml((state.user.fullName || "U").slice(0, 1).toUpperCase())}</div>
@@ -225,7 +227,14 @@ function viewTitle() {
 }
 
 function viewSubtitle() {
-  return "";
+  return {
+    overview: "Recent activity and operational health at a glance.",
+    food: "Create and manage donation posts from your restaurant.",
+    nearby: "Search available food by location and pickup radius.",
+    claims: "Review claim requests and keep handoffs moving.",
+    profile: "Keep organization details accurate for coordination.",
+    admin: "Monitor users, claims, and platform activity."
+  }[state.view] || "";
 }
 
 async function loadView() {
@@ -253,9 +262,9 @@ async function overviewView() {
 
   return html`
     <div class="grid cols-3">
-      <div class="panel metric"><span>Visible food posts</span><strong>${food.totalElements ?? foodItems.length}</strong></div>
-      <div class="panel metric"><span>Your role</span><strong>${escapeHtml(state.user.role)}</strong></div>
-      <div class="panel metric"><span>Session</span><strong>Active</strong></div>
+      <div class="panel metric"><span>Open food posts</span><strong>${food.totalElements ?? foodItems.length}</strong></div>
+      <div class="panel metric"><span>Account type</span><strong>${escapeHtml(roleLabel(state.user.role))}</strong></div>
+      <div class="panel metric"><span>Workspace</span><strong>Live</strong></div>
     </div>
     <div class="panel" style="margin-top:16px">
       <div class="panel-title">
@@ -423,6 +432,13 @@ function locationPickerMarkup(id) {
       <div id="${id}" class="location-map" data-location-map></div>
     </div>
   `;
+}
+
+function roleLabel(role) {
+  return String(role || "")
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
 function initLocationPickers() {
