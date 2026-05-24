@@ -197,7 +197,6 @@ function renderApp() {
         <div class="topbar">
           <div>
             <h2>${viewTitle()}</h2>
-            <p>${viewSubtitle()}</p>
           </div>
           <div class="user-pill">
             <div class="avatar">${escapeHtml((state.user.fullName || "U").slice(0, 1).toUpperCase())}</div>
@@ -226,14 +225,7 @@ function viewTitle() {
 }
 
 function viewSubtitle() {
-  return {
-    overview: "Live system overview and operations data.",
-    food: "Create, update, and retire restaurant food posts.",
-    nearby: "Find available food by latitude, longitude, and radius.",
-    claims: "Claim food and move requests through approval.",
-    profile: "Keep location and contact data current.",
-    admin: "Monitor users, food inventory, and claims."
-  }[state.view] || "";
+  return "";
 }
 
 async function loadView() {
@@ -267,13 +259,13 @@ async function overviewView() {
     </div>
     <div class="panel" style="margin-top:16px">
       <div class="panel-title">
-        <div><h3>Recent food posts</h3><p>Newest available items</p></div>
+        <div><h3>Recent food posts</h3></div>
       </div>
       ${foodList(foodItems)}
     </div>
     ${state.user.role === "ADMIN" && second ? `
       <div class="panel" style="margin-top:16px">
-        <div class="panel-title"><div><h3>Admin summary</h3><p>System totals</p></div></div>
+        <div class="panel-title"><div><h3>Admin summary</h3></div></div>
         <div class="grid cols-3">
           <div class="card metric"><span>Users</span><strong>${second.totalUsers}</strong></div>
           <div class="card metric"><span>Food posts</span><strong>${second.totalFoodPosts}</strong></div>
@@ -296,13 +288,13 @@ async function foodView() {
     <div class="grid cols-2">
       <div class="panel">
         <div class="panel-title">
-          <div><h3>Create food post</h3><p>Posting as ${escapeHtml(profile.restaurantName)}</p></div>
+          <div><h3>New food post</h3></div>
         </div>
         ${foodPostForm()}
       </div>
       <div class="panel">
         <div class="panel-title">
-          <div><h3>My food posts</h3><p>${food.totalElements ?? 0} total</p></div>
+          <div><h3>My food posts</h3><span class="meta">${food.totalElements ?? 0} total</span></div>
         </div>
         ${foodList(pageItems(food), true)}
       </div>
@@ -315,8 +307,8 @@ function restaurantProfileRequiredView() {
     <div class="panel">
       <div class="panel-title">
         <div>
-          <h3>Finish restaurant profile</h3>
-          <p>A restaurant account exists, but food posts need the restaurant profile location and contact record first.</p>
+          <h3>Complete your restaurant profile</h3>
+          <p class="meta">You need to set up your restaurant profile before posting food.</p>
         </div>
       </div>
       ${profileFormMarkup(true, null)}
@@ -352,7 +344,7 @@ function nearbyView() {
   return html`
     <div class="panel">
       <div class="panel-title">
-        <div><h3>Find nearby food</h3><p>Search available posts within a radius</p></div>
+        <div><h3>Find nearby food</h3></div>
       </div>
       <form class="form" id="nearbyForm">
         <div class="form-row">
@@ -365,7 +357,7 @@ function nearbyView() {
       </form>
     </div>
     <div class="panel" style="margin-top:16px">
-      <div class="panel-title"><div><h3>Results</h3><p>Available food posts appear here</p></div></div>
+      <div class="panel-title"><div><h3>Results</h3></div></div>
       <div id="nearbyResults" class="empty">Run a search to see food near you.</div>
     </div>
   `;
@@ -377,7 +369,7 @@ async function claimsView() {
   return html`
     <div class="panel">
       <div class="panel-title">
-        <div><h3>${state.user.role === "NGO" ? "My claims" : "Claim queue"}</h3><p>Approve, reject, or complete distribution requests</p></div>
+        <div><h3>${state.user.role === "NGO" ? "My claims" : "Claim queue"}</h3></div>
       </div>
       ${claimList(pageItems(claims))}
     </div>
@@ -396,7 +388,7 @@ async function profileView() {
   return html`
     <div class="panel">
       <div class="panel-title">
-        <div><h3>${isRestaurant ? "Restaurant" : "NGO"} profile</h3><p>Create or update your operational location</p></div>
+        <div><h3>${isRestaurant ? "Restaurant" : "NGO"} profile</h3></div>
       </div>
       ${profileFormMarkup(isRestaurant, profile)}
     </div>
@@ -503,11 +495,11 @@ async function adminView() {
     </div>
     <div class="grid cols-2" style="margin-top:16px">
       <div class="panel">
-        <div class="panel-title"><div><h3>Users</h3><p>Admin user management</p></div></div>
+        <div class="panel-title"><div><h3>Users</h3></div></div>
         ${userList(pageItems(users))}
       </div>
       <div class="panel">
-        <div class="panel-title"><div><h3>Claims</h3><p>System claim monitor</p></div></div>
+        <div class="panel-title"><div><h3>Claims</h3></div></div>
         ${claimList(pageItems(claims))}
       </div>
     </div>
